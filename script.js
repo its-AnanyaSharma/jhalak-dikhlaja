@@ -2,8 +2,18 @@ console.log("Runingg.....js")
 let currentSong = new Audio();
 let songs;
 
+const headers = {'Content-Type':'application/json',
+                    'Access-Control-Allow-Origin':'*',
+                    'Access-Control-Allow-Methods':'POST,PATCH,OPTIONS'}
+const response = {
+    statusCode: 200,
+    headers:headers,
+    body: JSON.stringify("songs"),
+}
+// return response;
+
 const playMusic = (track, pause=false)=>{
-    currentSong.src = "songs" + track
+    currentSong.src = `/${currentFolder}/` + track
     if(!pause){
         currentSong.play()
         play.src = "svgs/pause.svg"
@@ -29,10 +39,10 @@ function formatTime(seconds) {
     return `${minutes}:${formattedSeconds}`;
 }
 
-async function getSongs() {
+async function getSongs(folder) {
     currentFolder = folder
     // let a = await fetch(`/${folder}/`)
-    let a = await fetch("http://127.0.0.1:3000/songs/");
+    let a = await fetch(`http://127.0.0.1:3000/${folder}/`);
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
@@ -43,7 +53,7 @@ async function getSongs() {
         const element = as[index];
         if (element.href.endsWith(".mp3")) {
             let url = element.href;
-            let part1 = url.split("songs")[1];
+            let part1 = url.split(`/${currentFolder}/`)[1];
             songs.push(part1);
             
         }
@@ -70,6 +80,17 @@ async function getSongs() {
              </div>
          </li>`;
      }
+      // Attach an event listener to each song
+      Array.from(document.querySelector(".songList").getElementsByTagName("li")).forEach(e=>{
+        e.addEventListener("click",element=>{
+            console.log(e.querySelector(".info").firstElementChild.innerHTML)
+            playMusic(e.querySelector(".info").firstElementChild.innerHTML.trim())
+            
+            
+
+        })
+    })
+     return songs;
 }
 
 async function main(){
@@ -77,5 +98,37 @@ async function main(){
     await getSongs("songs/happy");
     console.log(songs);
     playMusic(songs[0],true)
+
+     // Attach an event listener to play 
+     play.addEventListener("click",()=>{
+        if(currentSong.paused){
+            currentSong.play()
+            play.src = "svgs/pause.svg"
+        }
+        else{
+            currentSong.pause()
+            play.src = "svgs/play.svg"
+            
+        }
+    })
+    // Event listener for prev 
+    prev.addEventListener("click", ()=>{
+        currentSong.pause()
+        console.log("play prev")
+        let index = songs.indexOf(currentSong.src.split("/").slice(-1)[0])
+        if((index-1)>= 0){
+            playMusic(songs[index-1])
+        }
+    })
+    // Event listener for next
+    next.addEventListener("click", ()=>{
+        currentSong.pause()
+        console.log("Next playing")
+        let index = songs.indexOf(currentSong.src.split("/").slice(-1)[0])
+        if((index+1) <songs.length){
+            playMusic(songs[index+1])
+        }
+       
+    })
 }
 main()
