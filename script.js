@@ -3,7 +3,7 @@ let currentSong = new Audio();
 let songs;
 
 const playMusic = (track, pause=false)=>{
-    currentSong.src = `/${currentFolder}/` + track
+    currentSong.src = "songs" + track
     if(!pause){
         currentSong.play()
         play.src = "svgs/pause.svg"
@@ -29,10 +29,10 @@ function formatTime(seconds) {
     return `${minutes}:${formattedSeconds}`;
 }
 
-async function getSongs(folder) {
+async function getSongs() {
     currentFolder = folder
     // let a = await fetch(`/${folder}/`)
-    let a = await fetch(`http://127.0.0.1:3000/${folder}/`);
+    let a = await fetch("http://127.0.0.1:3000/songs/");
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
@@ -43,7 +43,7 @@ async function getSongs(folder) {
         const element = as[index];
         if (element.href.endsWith(".mp3")) {
             let url = element.href;
-            let part1 = url.split(`/${currentFolder}/`)[1];
+            let part1 = url.split("songs")[1];
             songs.push(part1);
             
         }
